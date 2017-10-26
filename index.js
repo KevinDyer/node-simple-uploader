@@ -42,8 +42,25 @@
         });
       });
     }
+
+    close() {
+      return new Promise((resolve, reject) => {
+        this._server.once('error', reject);
+        this._server.close(() => {
+          this._server.removeListener('error', reject);
+          resolve();
+        });
+      });
+    }
   }
 
   const server = new Server();
-  server.listen(PORT);
+  server.listen(PORT)
+  .then(() => console.log(`Listening on ${PORT}...`));
+
+  process.on('SIGINT', () => {
+    console.log(`Closing...`);
+    server.close()
+    .then(() => process.exit(0));
+  })
 })();
